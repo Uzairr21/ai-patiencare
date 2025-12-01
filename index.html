@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI PatientCare | Reception Portal</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+    const { useState, useEffect } = React;
+
+    // Helper to generate a random ID (Simulation of a DB ID)
+    const generateId = () => {
+        return Math.random().toString(36).substring(2, 10).toUpperCase();
+    };
+
+    // Helper to format date to Australian DD/MM/YYYY
+    const formatDateToAU = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };
+
+    // Helper to force phone numbers as text in Google Sheets
+    // Adds an apostrophe (') if the number starts with + or 0
+    const formatPhoneForSheet = (phone) => {
+        if (!phone) return "";
+        // If it starts with + or 0, prepend ' to force text mode in Excel/Sheets
+        if (phone.startsWith("+") || phone.startsWith("0")) {
+            return `'${phone}`;
+        }
+        return phone;
+    };
+
+    const App = () => {
+        const [showSettings, setShowSettings] = useState(false);
+        const [webhookUrl, setWebhookUrl] = useState("");
+        const [loading, setLoading] = useState(false);
+        const [status, setStatus] = useState(null); // 'success', 'error'
+        
+        const [formData, setFormData] = useState({
+            patientName: "",
+            phoneNumber: "",
+            appointmentDate: "",
+            appointmentTime: "",
+            notes: ""
+        });
+
+        // Load webhook URL from local storage on start
+        useEffect(() => {
+            const savedUrl = localStorage.getItem("n8n_webhook_url");
+            if (savedUrl) setWebhookUrl(savedUrl);
+        }, []);
+
+        const handleInputChange = (e) => {
+            setFormData({ ...formData, [e.target.name]: e.target.value });
+        };
+
+        const saveSettings = () => {
+            localStorage.setItem("n8n_webhook_url", webhookUrl);
+            setShowSettings(false);
+        };
+
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+            setLoading(true);
+            setStatus(null);
+
+            if (!webhookUrl) {
+                alert("Please configure the n8n Webhook URL in Settings first!");
+                setLoading(false);
+                return;
+            }
+
+            // Prepare the payload strictly matching your Google Sheet Columns
+            const payload = {
+                "ID": generateId(),
+                "Patient Name": formData.patientName,
+                // Apply the ' apostrophe fix here
+                "Phone Number": formatPhoneForSheet(formData.phoneNumber),
+                "Appointment Date": formatDateToAU(formData.appointmentDate), // Send DD/MM/YYYY
+                "Appointment Time": formData.appointmentTime,
+                "Reminder Status": "Pending",
+                "Confirmation Status": "Pending",
+                "Follow-Up Call Status": "Pending",
+                "Post Appointment SMS Status": "Pending",
+                "Notes": formData.notes
+            };
+
+            try {
+                // Sending POST request to n8n
+                await fetch(webhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                // Reset logic: Clear form immediately after "success" delay
+                setTimeout(() => {
+                    setLoading(false);
+                    setStatus('success');
+                    
+                    // CLEAR FORM FIELDS
+                    setFormData({
+                        patientName: "",
+                        phoneNumber: "",
+                        appointmentDate: "",
+                        appointmentTime: "",
+                        notes: ""
+                    });
+
+                    // Auto-hide success message after 4 seconds
+                    setTimeout(() => setStatus(null), 4000);
+
+                }, 800);
+
+            } catch (error) {
+                console.error("Error:", error);
+                setLoading(false);
+                setStatus('error');
+            }
+        };
+
+        return (
+            <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-indigo-100">
+                
+                {/* Main Card */}
+                <div className="glass-panel w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-fade-in">
+                    
+                    {/* Left Side: Branding */}
+                    <div className="bg-indigo-600 p-10 flex flex-col justify-between text-white md:w-1/3">
+                        <div>
+                            <div className="flex items-center gap-3 mb-8">
+                                <i className="fa-solid fa-brain text-4xl text-indigo-200"></i>
+                                <h1 className="text-2xl font-bold tracking-tight">AI PatientCare</h1>
+                            </div>
+                            <h2 className="text-3xl font-bold mb-4">Reception Portal</h2>
+                            <p className="text-indigo-200 leading-relaxed">
+                                Enter patient details below. The system will automatically add them to the central database and trigger the Confirmation SMS workflow.
+                            </p>
+                        </div>
+                        <div className="mt-8 text-sm text-indigo-300">
+                            <p>System Status: <span className="text-green-400 font-bold">● Online</span></p>
+                            <p>Pilot Version 1.0.7 (Sheet Fix)</p>
+                        </div>
+                    </div>
+
+                    {/* Right Side: Form */}
+                    <div className="p-10 md:w-2/3 relative">
+                        
+                        {/* Settings Toggle */}
+                        <button 
+                            onClick={() => setShowSettings(!showSettings)}
+                            className="absolute top-6 right-6 text-gray-400 hover:text-indigo-600 transition"
+                            title="Configure n8n Connection"
+                        >
+                            <i className="fa-solid fa-gear text-xl"></i>
+                        </button>
+
+                        {/* Settings Modal (Inline) */}
+                        {showSettings && (
+                            <div className="mb-6 p-4 bg-gray-50 border border-indigo-100 rounded-lg animate-fade-in">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">n8n Webhook URL (POST)</label>
+                                <input 
+                                    type="text" 
+                                    value={webhookUrl}
+                                    onChange={(e) => setWebhookUrl(e.target.value)}
+                                    placeholder="https://your-n8n.cloud/webhook/..."
+                                    className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 outline-none"
+                                />
+                                <button 
+                                    onClick={saveSettings}
+                                    className="mt-2 text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700"
+                                >
+                                    Save Connection
+                                </button>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Name */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Patient Name</label>
+                                    <div className="relative">
+                                        <i className="fa-solid fa-user absolute left-3 top-3 text-gray-400"></i>
+                                        <input 
+                                            type="text" 
+                                            name="patientName"
+                                            required
+                                            value={formData.patientName}
+                                            onChange={handleInputChange}
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                                            placeholder="e.g. John Doe"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Phone */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                    <div className="relative">
+                                        <i className="fa-solid fa-phone absolute left-3 top-3 text-gray-400"></i>
+                                        <input 
+                                            type="tel" 
+                                            name="phoneNumber"
+                                            required
+                                            value={formData.phoneNumber}
+                                            onChange={handleInputChange}
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                                            placeholder="+61 400 000 000"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Date */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Appointment Date</label>
+                                    <input 
+                                        type="date" 
+                                        name="appointmentDate"
+                                        required
+                                        value={formData.appointmentDate}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition text-gray-600"
+                                    />
+                                </div>
+
+                                {/* Time */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Appointment Time</label>
+                                    <input 
+                                        type="time" 
+                                        name="appointmentTime"
+                                        required
+                                        value={formData.appointmentTime}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition text-gray-600"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Notes */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Clinical Notes (Optional)</label>
+                                <textarea 
+                                    name="notes"
+                                    rows="3"
+                                    value={formData.notes}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition resize-none"
+                                    placeholder="Reason for visit..."
+                                ></textarea>
+                            </div>
+
+                            {/* Submit Button */}
+                            <button 
+                                type="submit" 
+                                disabled={loading}
+                                className={`w-full py-3 rounded-lg text-white font-semibold shadow-md transition transform hover:-translate-y-0.5 ${
+                                    loading ? "bg-indigo-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+                                }`}
+                            >
+                                {loading ? (
+                                    <span><i className="fa-solid fa-circle-notch fa-spin mr-2"></i> Syncing to Database...</span>
+                                ) : (
+                                    <span><i className="fa-solid fa-calendar-check mr-2"></i> Book Appointment</span>
+                                )}
+                            </button>
+
+                            {/* Success/Error Messages */}
+                            {status === 'success' && (
+                                <div className="p-4 bg-green-50 text-green-700 rounded-lg flex items-center animate-fade-in mt-4">
+                                    <i className="fa-solid fa-check-circle text-xl mr-3"></i>
+                                    <div>
+                                        <p className="font-bold">Booking Confirmed</p>
+                                        <p className="text-sm">Patient added to Database. Form ready for next entry.</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {status === 'error' && (
+                                <div className="p-4 bg-red-50 text-red-700 rounded-lg flex items-center animate-fade-in mt-4">
+                                    <i className="fa-solid fa-circle-exclamation text-xl mr-3"></i>
+                                    <div>
+                                        <p className="font-bold">Connection Error</p>
+                                        <p className="text-sm">Could not reach n8n. Check your Webhook URL.</p>
+                                    </div>
+                                </div>
+                            )}
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+
+</script>
+
+</body>
+</html>
