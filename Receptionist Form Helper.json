@@ -1,0 +1,190 @@
+{
+  "name": "Receptionist Form Helper",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "reception",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4a87072d-b5cc-43ea-b15b-608414073546",
+      "name": "Webhook",
+      "webhookId": "adb83d9f-9f32-4ce8-b6e4-fcf8e09ee557"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1IV6pC3Zf53KXA8vOvkZQdMXWJdOnAleHpvBSpYxTqoE",
+          "mode": "list",
+          "cachedResultName": "patients_db",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IV6pC3Zf53KXA8vOvkZQdMXWJdOnAleHpvBSpYxTqoE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IV6pC3Zf53KXA8vOvkZQdMXWJdOnAleHpvBSpYxTqoE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Patient Name": "={{ $json.body['Patient Name'] }}",
+            "Phone Number": "={{ $json.body['Phone Number'] }}",
+            "Appointment Date": "={{ $json.body['Appointment Date'] }}",
+            "Appointment Time": "={{ $json.body['Appointment Time'] }}",
+            "Reminder Status": "Pending",
+            "Confirmation Status": "Pending",
+            "Follow-Up Call Status": "Pending",
+            "Post Appointment SMS Status": "Pending",
+            "ID": "={{ $json.body.ID }}",
+            "Notes": "={{ $json.body.Notes }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Patient Name",
+              "displayName": "Patient Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Appointment Date",
+              "displayName": "Appointment Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Appointment Time",
+              "displayName": "Appointment Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reminder Status",
+              "displayName": "Reminder Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Confirmation Status",
+              "displayName": "Confirmation Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow-Up Call Status",
+              "displayName": "Follow-Up Call Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post Appointment SMS Status",
+              "displayName": "Post Appointment SMS Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "39c02100-d873-4d5f-abb5-b1eff25eb6b1",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KvbxACktpbsqO6K9",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "992b0cac-9382-4c25-ae78-96dc863e952c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5e62b70d8898a796b53ba1f08732109984f991d92037bfd110cc29497ebef9e9"
+  },
+  "id": "gVKDY0mjNfJysa1v",
+  "tags": []
+}

@@ -1,0 +1,317 @@
+{
+  "name": "Workflow 3 - Follow-up Call with Logic",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        16
+      ],
+      "id": "e791342a-f835-4fd4-bd1a-3823a97c77b4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1IV6pC3Zf53KXA8vOvkZQdMXWJdOnAleHpvBSpYxTqoE",
+          "mode": "list",
+          "cachedResultName": "patients_db",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IV6pC3Zf53KXA8vOvkZQdMXWJdOnAleHpvBSpYxTqoE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IV6pC3Zf53KXA8vOvkZQdMXWJdOnAleHpvBSpYxTqoE/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        48,
+        -16
+      ],
+      "id": "35d8ba7f-6604-4483-ab7d-fcb1abe89ca2",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KvbxACktpbsqO6K9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "call",
+        "from": "+1 970 436 9758",
+        "to": "={{ $json['Phone Number'] }}",
+        "twiml": true,
+        "message": "=<Response>   <Play>https://drive.google.com/uc?export=download&amp;id=1aHY5WWpsWjw40XtKuZCEvCNjoP8D7iUq</Play> </Response>",
+        "options": {
+          "statusCallback": ""
+        }
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -16
+      ],
+      "id": "09780231-43f3-4634-9c00-039692570cbb",
+      "name": "Make a call",
+      "notesInFlow": false,
+      "credentials": {
+        "twilioApi": {
+          "id": "aoKIguNml5Eii0vh",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1IV6pC3Zf53KXA8vOvkZQdMXWJdOnAleHpvBSpYxTqoE",
+          "mode": "list",
+          "cachedResultName": "patients_db",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IV6pC3Zf53KXA8vOvkZQdMXWJdOnAleHpvBSpYxTqoE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IV6pC3Zf53KXA8vOvkZQdMXWJdOnAleHpvBSpYxTqoE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Get row(s) in sheet').item.json.ID }}",
+            "Follow-Up Call Status": "Call Made"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Patient Name",
+              "displayName": "Patient Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Appointment Date",
+              "displayName": "Appointment Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Appointment Time",
+              "displayName": "Appointment Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reminder Status",
+              "displayName": "Reminder Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Confirmation Status",
+              "displayName": "Confirmation Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow-Up Call Status",
+              "displayName": "Follow-Up Call Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        752,
+        -16
+      ],
+      "id": "c46aba79-ebbf-415d-afd4-1c2edd592b0c",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KvbxACktpbsqO6K9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9143d741-be66-4b9d-b2ca-8beb5ae72cd6",
+              "leftValue": "={{\n  // 1. Check Status: Only proceed if we haven't called yet\n  $json[\"Follow-Up Call Status\"] == 'Pending' &&\n  \n  // 2. Check Quiet Hours: Only call between 7 AM (7) and 9 PM (21)\n  $now.hour >= 7 && $now.hour < 21 &&\n  \n  // 3. Check Urgency: Combine Date+Time and check if it's less than 24 hours away\n  DateTime.fromFormat($json[\"Appointment Date\"] + ' ' + $json[\"Appointment Time\"], 'dd/MM/yyyy HH:mm').diff($now, 'hours').hours <= 24 &&\n  \n  // 4. Check Validity: Ensure the appointment hasn't already passed\n  DateTime.fromFormat($json[\"Appointment Date\"] + ' ' + $json[\"Appointment Time\"], 'dd/MM/yyyy HH:mm').diff($now, 'hours').hours > 0\n}}",
+              "rightValue": "=True",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        0
+      ],
+      "id": "94601128-a890-41c4-b3d0-3de3e5c1c0d1",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make a call": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Make a call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b0e60d82-00f4-44dd-b54c-4bf9d81b1bcb",
+  "meta": {
+    "instanceId": "5e62b70d8898a796b53ba1f08732109984f991d92037bfd110cc29497ebef9e9"
+  },
+  "id": "Wl5vzEb9GtfvrDib",
+  "tags": []
+}
