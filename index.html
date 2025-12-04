@@ -80,10 +80,11 @@
             notes: ""
         });
 
-        // Load webhook URL from local storage on start
+       // Hardcoded Webhook URL for Assessment Demo
         useEffect(() => {
-            const savedUrl = localStorage.getItem("n8n_webhook_url");
-            if (savedUrl) setWebhookUrl(savedUrl);
+            // PASTE YOUR COPIED N8N URL INSIDE THE QUOTES BELOW
+            const demoUrl = "https://mohammahuzair1.app.n8n.cloud/webhook/reception"; 
+            setWebhookUrl(demoUrl);
         }, []);
 
         const handleInputChange = (e) => {
